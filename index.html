@@ -85,6 +85,64 @@
     .pill{display:none}.pill.on{display:inline-block}
     .card{break-inside:avoid}
   }
+/* MOBILE START */
+  @media screen and (max-width:700px){
+    body{padding:16px 12px 150px;font-size:15px}
+    header{margin-bottom:14px}
+    h1{font-size:30px}
+    .toolbar{width:100%}
+    .toolbar button{flex:1 1 auto;padding:11px 10px}
+    .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .tab{white-space:nowrap;padding:12px 12px}
+    .card{padding:14px}
+    .info{grid-template-columns:1fr}
+    input,select,textarea{font-size:16px;padding:10px}  /* 16px stops iOS zoom on focus */
+
+    /* Checklist rows become cards */
+    .tbl thead{display:none}
+    .tbl,.tbl tbody{display:block}
+    .tbl tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+      background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+    .tbl td{display:block;border:none;padding:0;background:transparent!important}
+    .tbl tr.excluded{background:#F6E3DC;border-color:var(--bad)}
+    #checkBody td:nth-child(1){display:none}
+    #checkBody td:nth-child(2),#checkBody td:nth-child(3),#checkBody td:nth-child(7){grid-column:1/-1}
+    #checkBody td:nth-child(4),#checkBody td:nth-child(5),#checkBody td:nth-child(6){
+      text-align:left;font-size:13px;background:#fff!important;border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-height:32px}
+    #checkBody td:nth-child(4)::before{content:"Điểm ";color:var(--muted)}
+    #checkBody td:nth-child(5)::before{content:"TS ";color:var(--muted)}
+    #checkBody td:nth-child(6)::before{content:"× TS ";color:var(--muted)}
+    .cat{font-size:15px}
+    .how{font-size:13.5px}
+    .pills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .pill{min-height:46px;font-size:14px}
+
+    /* Score bar stays at the bottom while scrolling the list */
+    .summary{position:sticky;bottom:0;z-index:20;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;
+      margin:4px -12px 0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+      background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -6px 16px rgba(31,59,45,.08)}
+    .summary .card{padding:5px 8px;border-radius:9px}
+    .stat b{font-size:17px;line-height:1.15}
+    .stat small{font-size:10.5px;line-height:1.2}
+    .verdict{grid-column:1/-1;flex-direction:row;align-items:baseline;gap:8px}
+    .verdict small{flex:0 0 auto}
+    .verdict b{font-size:15px}
+    .sign{grid-template-columns:1fr;gap:28px}
+
+    /* Criteria editor rows become cards */
+    #setupBody td:nth-child(1){display:none}
+    #setupBody td:nth-child(2),#setupBody td:nth-child(3),#setupBody td:nth-child(4),#setupBody td:nth-child(7){grid-column:1/-1}
+    #setupBody td:nth-child(5){grid-column:1/3}
+    #setupBody td:nth-child(6){grid-column:3/4;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+    #setupBody td:nth-child(5)::before{content:"Trọng số (%) ";font-size:12px;color:var(--muted)}
+    #setupBody td:nth-child(6)::before{content:"Loại trừ"}
+    #setupBody td:nth-child(7){text-align:right}
+    .edit-tbl td.w input{width:90px}
+    button.ghost{padding:8px 12px;font-size:16px}
+    .row input{width:80px}
+    .modal-box{padding:16px}
+  }
+/* MOBILE END */
 </style>
 </head>
 <body>
