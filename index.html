@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist kiểm tra vợt cũ</title>
+<style>
+  :root{
+    --ink:#1F3B2D; --paper:#F6F3EA; --card:#FBF9F3; --line:#D6CFBB; --muted:#5F6D64;
+    --accent:#C8E14B; --good:#2F7A4A; --mid:#C98A1B; --bad:#B4472C; --na:#8C8C8C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"Avenir Next","Helvetica Neue",Helvetica,sans-serif;font-size:14px;padding:36px 20px 96px}
+  .wrap{max-width:1180px;margin:0 auto}
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--ink);padding:4px 10px;border-radius:99px}
+  h1{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:clamp(30px,4.4vw,48px);line-height:1.02;margin-top:12px;font-weight:600}
+  h1 em{font-style:italic;background:linear-gradient(transparent 62%,var(--accent) 62%)}
+  h2{font-family:"Iowan Old Style",Georgia,serif;font-size:20px;font-weight:600;margin-bottom:12px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+  button{font:inherit;cursor:pointer;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px}
+  button:hover{background:var(--ink);color:var(--paper)}
+  button.primary{background:var(--ink);color:var(--paper)}
+  button.primary:hover{background:#2c5440}
+  button.ghost{border-color:transparent;color:var(--muted);padding:4px 8px}
+  button.ghost:hover{background:#ece6d5;color:var(--bad)}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .tab{border:none;border-bottom:3px solid transparent;border-radius:0;padding:10px 16px;color:var(--muted)}
+  .tab:hover{background:transparent;color:var(--ink)}
+  .tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+  .panel{display:none}.panel.on{display:block}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+  label.f{display:flex;flex-direction:column;gap:5px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  input,select,textarea{font:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%}
+  textarea{resize:vertical;min-height:36px}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:var(--ink)}
+  .tbl{width:100%;border-collapse:separate;border-spacing:0}
+  .tbl th{background:var(--ink);color:var(--paper);font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;text-align:left;padding:10px}
+  .tbl th:first-child{border-top-left-radius:10px}.tbl th:last-child{border-top-right-radius:10px}
+  .tbl td{border-bottom:1px solid var(--line);padding:9px 10px;vertical-align:top;background:var(--card)}
+  .tbl tr.excluded td{background:#F6E3DC}
+  .tbl tr.na td{opacity:.55}
+  .cat{font-weight:700}
+  .how{color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:3px}
+  .n{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .ko{display:inline-block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:var(--bad);color:#fff;border-radius:5px;padding:2px 6px;margin-top:5px}
+  .pills{display:flex;gap:4px;flex-wrap:wrap}
+  .pill{border:1px solid var(--line);background:#fff;font-weight:600;font-size:12px;padding:6px 9px;border-radius:8px;color:var(--muted)}
+  .pill:hover{background:#fff;border-color:var(--ink);color:var(--ink)}
+  .pill.on[data-v="good"]{background:var(--good);border-color:var(--good);color:#fff}
+  .pill.on[data-v="mid"]{background:var(--mid);border-color:var(--mid);color:#fff}
+  .pill.on[data-v="bad"]{background:var(--bad);border-color:var(--bad);color:#fff}
+  .pill.on[data-v="na"]{background:var(--na);border-color:var(--na);color:#fff}
+  .summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.6fr);gap:12px;margin-top:16px}
+  .stat b{display:block;font-family:"Iowan Old Style",Georgia,serif;font-size:30px;font-weight:600;font-variant-numeric:tabular-nums}
+  .stat small{color:var(--muted);font-size:12px}
+  .verdict{display:flex;flex-direction:column;justify-content:center;border-width:2px}
+  .verdict b{font-size:26px}
+  .verdict.ok{background:#E3F0DC;border-color:var(--good)}
+  .verdict.no{background:#F6E3DC;border-color:var(--bad);color:var(--bad)}
+  .verdict.wait{background:var(--card)}
+  .sign{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px}
+  .sign div{border-top:1px dotted var(--ink);padding-top:6px;text-align:center;font-size:12px;color:var(--muted)}
+  .edit-tbl td input,.edit-tbl td textarea,.edit-tbl td select{font-size:13px}
+  .edit-tbl td.w input{width:72px;text-align:center}
+  .sum-ok{color:var(--good);font-weight:700}.sum-bad{color:var(--bad);font-weight:700}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+  .row{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .row span{flex:1}
+  .row input{width:90px;text-align:center}
+  .hint{color:var(--muted);font-size:12.5px;line-height:1.5;margin-top:10px}
+  .toast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none;font-weight:600}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .modal{position:fixed;inset:0;background:rgba(31,59,45,.35);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .modal.show{display:flex}
+  .modal-box{background:var(--paper);border:1px solid var(--ink);border-radius:16px;padding:22px;width:min(640px,100%)}
+  #mCode{display:none;height:180px;font-family:Menlo,Consolas,monospace;font-size:11px;margin-top:12px;white-space:pre}
+  @media print{.modal{display:none!important}}
+  @media(max-width:860px){.info{grid-template-columns:repeat(2,minmax(0,1fr))}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}}
+  @media print{
+    @page{size:A4 landscape;margin:10mm}
+    body{padding:0;font-size:11px}
+    .toolbar,.tabs,#p-setup,.no-print{display:none!important}
+    #p-check{display:block!important}
+    .pill{display:none}.pill.on{display:inline-block}
+    .card{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <span class="tag">Kiểm tra vợt lướt</span>
+      <h1>Checklist <em>kiểm tra vợt</em></h1>
+    </div>
+    <div class="toolbar">
+      <button onclick="newCheck()">Vợt mới</button>
+      <button onclick="printSheet()">In phiếu</button>
+      <button class="primary" onclick="downloadHtml()">Tải file HTML</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" data-tab="p-check">Chấm vợt</button>
+    <button class="tab" data-tab="p-setup">Chỉnh tiêu chí &amp; trọng số</button>
+  </div>
+
+  <!-- ===== CHẤM VỢT ===== -->
+  <section class="panel on" id="p-check">
+    <div class="card info" id="info"></div>
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:36px">#</th><th style="width:30%">Tiêu chí &amp; cách kiểm tra</th><th>Kết quả</th>
+        <th class="n" style="width:64px">Điểm</th><th class="n" style="width:76px">Trọng số</th><th class="n" style="width:80px">Điểm × TS</th><th style="width:22%">Ghi chú</th>
+      </tr></thead>
+      <tbody id="checkBody"></tbody>
+    </table>
+    <div class="summary">
+      <div class="card stat"><b id="sScore">–</b><small>Điểm tổng / 100</small></div>
+      <div class="card stat"><b id="sDone">–</b><small>Mục đã chấm</small></div>
+      <div class="card stat"><b id="sKo">0</b><small>Lỗi loại trừ</small></div>
+      <div class="card stat verdict ok" id="vBox"><small>Kết luận</small><b id="sVerdict">–</b></div>
+    </div>
+    <div class="sign"><div>Người kiểm tra (ký, ghi rõ họ tên)</div><div>Quản lý cửa hàng duyệt (ký, ghi rõ họ tên)</div></div>
+  </section>
+
+  <!-- ===== CHỈNH TIÊU CHÍ ===== -->
+  <section class="panel" id="p-setup">
+    <div class="card">
+      <h2>Tiêu chí kiểm tra</h2>
+      <table class="tbl edit-tbl">
+        <thead><tr>
+          <th style="width:36px">#</th><th style="width:13%">Hạng mục</th><th style="width:20%">Tiêu chí</th><th>Cách kiểm tra / cách chấm</th>
+          <th class="n" style="width:90px">Trọng số (%)</th><th class="n" style="width:90px">Loại trừ khi Lỗi nặng</th><th style="width:110px"></th>
+        </tr></thead>
+        <tbody id="setupBody"></tbody>
+      </table>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px;flex-wrap:wrap">
+        <button onclick="addItem()">+ Thêm tiêu chí</button>
+        <span>Tổng trọng số: <span id="wSum" class="sum-ok">100%</span></span>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>Điểm cho từng kết quả</h2>
+        <div id="scoreCfg"></div>
+        <p class="hint">"Không áp dụng" được bỏ khỏi tổng trọng số, nên vợt nào cũng chấm trên thang 100.</p>
+      </div>
+      <div class="card">
+        <h2>Mốc xếp loại</h2>
+        <div id="gradeCfg"></div>
+        <p class="hint">Điểm dưới mốc thấp nhất, hoặc có lỗi loại trừ, thì kết luận là "Không nhận".</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>Thông tin đầu phiếu</h2>
+      <textarea id="fieldsCfg" rows="3"></textarea>
+      <p class="hint">Mỗi ô cách nhau bằng dấu phẩy. Thông tin này hiện ở đầu tab "Chấm vợt".</p>
+    </div>
+
+    <div class="card no-print" style="margin-top:16px">
+      <h2>Lưu và chia sẻ</h2>
+      <p class="hint" style="margin-top:0">Mọi thay đổi được lưu tự động trên trình duyệt này. Bấm <b>Tải file HTML</b> để có một file mới chứa sẵn tiêu chí đã chỉnh, gửi cho chi nhánh khác mở bằng trình duyệt là dùng được ngay.</p>
+      <div class="toolbar" style="margin-top:12px">
+        <button class="primary" onclick="downloadHtml()">Tải file HTML</button>
+        <button onclick="resetConfig()">Khôi phục mặc định</button>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast">Nếu hộp thoại in không hiện, nhấn Cmd+P / Ctrl+P</div>
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2 id="mTitle"></h2>
+    <p id="mMsg" class="hint" style="margin-top:0"></p>
+    <textarea id="mCode" readonly="" spellcheck="false"></textarea>
+    <div class="toolbar" id="mActions" style="justify-content:flex-end;margin-top:14px"></div>
+  </div>
+</div>
+
+<!-- Cấu hình mặc định. Có thể sửa trực tiếp ở đây bằng trình soạn thảo văn bản. -->
+<script id="defaultConfig" type="application/json">
+{
+  "version": 3,
+  "fields": [
+    "Ngày kiểm tra",
+    "Chi nhánh",
+    "Người kiểm tra",
+    "Người bán / ký gửi",
+    "Mã sản phẩm (Haravan)",
+    "Hãng",
+    "Mẫu vợt",
+    "Loại mặt vợt"
+  ],
+  "scores": {
+    "good": 10,
+    "mid": 5,
+    "bad": 0
+  },
+  "labels": {
+    "good": "Tốt",
+    "mid": "Lỗi nhẹ",
+    "bad": "Lỗi nặng",
+    "na": "Không áp dụng"
+  },
+  "grades": [
+    {
+      "name": "Loại A",
+      "min": 85
+    },
+    {
+      "name": "Loại B",
+      "min": 70
+    },
+    {
+      "name": "Loại C",
+      "min": 50
+    }
+  ],
+  "items": [
+    {
+      "cat": "Lõi",
+      "name": "Lõi có vỡ không",
+      "how": "Gõ nhẹ khắp mặt vợt, nghe tiếng rè hoặc lạch cạch; lắc vợt nghe tiếng động bên trong. Lỗi nặng = lõi vỡ.",
+      "w": 18,
+      "ko": true
+    },
+    {
+      "cat": "Lõi",
+      "name": "Ọp đầu",
+      "how": "Ấn ngón cái vào vùng đầu vợt, so với vùng giữa. Tốt = cứng đều. Lỗi nhẹ = ọp nhẹ. Lỗi nặng = ọp nặng, lún rõ → không nhận.",
+      "w": 18,
+      "ko": true
+    },
+    {
+      "cat": "Sửa chữa",
+      "name": "Vợt có bị sửa không",
+      "how": "Tìm dấu keo lạ, sơn lại, viền đã thay, mặt dán lại. Lỗi nhẹ = sửa nhỏ bên ngoài. Lỗi nặng = đã sửa lõi, mặt hoặc viền.",
+      "w": 15,
+      "ko": true
+    },
+    {
+      "cat": "Mặt vợt",
+      "name": "Mặt Joola: độ xước, bị bóng",
+      "how": "Soi mặt dưới đèn, nghiêng vợt để thấy vết xước và vùng bị bóng. Nhẹ = xước nhẹ, bóng ít. Nặng = xước sâu, bóng nhiều. Không phải mặt trơn thì chọn Không áp dụng.",
+      "w": 10,
+      "ko": false
+    },
+    {
+      "cat": "Mặt vợt",
+      "name": "Mặt nhám: còn nhám hay không",
+      "how": "Vuốt tay khắp mặt, so vùng giữa với vùng mép. Nhẹ = vùng giữa mòn một phần. Nặng = vùng giữa trơn. Không phải mặt nhám thì chọn Không áp dụng.",
+      "w": 10,
+      "ko": false
+    },
+    {
+      "cat": "NFC",
+      "name": "Có chip NFC không",
+      "how": "Chạm điện thoại vào vợt để quét NFC. Lỗi nặng = không có hoặc không quét được (bắt buộc với Joola). Hãng không dùng NFC thì chọn Không áp dụng.",
+      "w": 5,
+      "ko": true
+    },
+    {
+      "cat": "Viền",
+      "name": "Viền có bung không",
+      "how": "Kiểm tra keo và khe hở giữa viền và mặt vợt quanh toàn bộ chu vi. Lỗi nhẹ = hở nhỏ một điểm. Lỗi nặng = bung, hở rõ.",
+      "w": 5,
+      "ko": false
+    },
+    {
+      "cat": "Ngoại hình",
+      "name": "Xước đầu, cạnh, thân vợt",
+      "how": "Mức độ xước, tróc sơn ở đầu, cạnh và thân vợt. Móp = trả vợt. Lỗi nặng = tróc sơn lớn, xước vào thịt vợt.",
+      "w": 2,
+      "ko": false
+    },
+    {
+      "cat": "Cuốn cốt",
+      "name": "Cuốn cốt còn zin không",
+      "how": "Tốt = còn zin, sạch. Lỗi nhẹ = đã thay nhưng còn tốt, hoặc zin nhưng bẩn. Lỗi nặng = rách, bong, cần thay.",
+      "w": 1,
+      "ko": false
+    },
+    {
+      "cat": "Đít vợt",
+      "name": "Đít vợt có xước không",
+      "how": "Kiểm tra nắp đít và logo đít: xước, nứt, lỏng. Lỗi nặng = nứt hoặc lỏng nắp.",
+      "w": 1,
+      "ko": false
+    },
+    {
+      "cat": "Cán vợt",
+      "name": "Cán có gãy, lỏng hoặc đã sửa không",
+      "how": "Bóc quấn cán và vén ra, lay cán so với mặt vợt. Lỗi nhẹ = hơi lỏng, chưa nứt. Lỗi nặng = gãy, nứt, lỏng rõ hoặc đã sửa → không nhận.",
+      "w": 15,
+      "ko": true
+    }
+  ]
+}
+</script>
+
+<script id="app">
+const KEY_CFG = 'pl_racket_cfg_v2', KEY_CHK = 'pl_racket_check_v1';
+const DEFAULT = JSON.parse(document.getElementById('defaultConfig').textContent);
+const clone = o => JSON.parse(JSON.stringify(o));
+let cfg = load(KEY_CFG);
+// Repo default wins when its version differs: tang "version" trong defaultConfig de day tieu chi moi xuong moi may.
+if (!cfg || cfg.version !== DEFAULT.version) cfg = clone(DEFAULT);
+let chk = load(KEY_CHK) || {info:{}, res:{}, notes:{}};
+cfg.items.forEach(ensureId);
+
+function load(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY_CFG, JSON.stringify(cfg)); localStorage.setItem(KEY_CHK, JSON.stringify(chk)); }catch(e){} }
+function ensureId(it){
+  if (it.id) return;
+  let h = 0; for (const c of (it.cat + '|' + it.name)) h = (h * 31 + c.codePointAt(0)) >>> 0;
+  let id = 'i' + h.toString(36), n = 2;
+  while (cfg && cfg.items.some(x => x !== it && x.id === id)) id = 'i' + h.toString(36) + '-' + n++;
+  it.id = id;
+}
+function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === b.dataset.tab));
+  if (b.dataset.tab === 'p-check') renderCheck();
+});
+
+/* ---------- Chấm vợt ---------- */
+function renderCheck(){
+  document.getElementById('info').innerHTML = cfg.fields.map((f, i) =>
+    `<label class="f">${esc(f)}<input data-k="${esc(f)}" value="${esc(chk.info[f])}" ${i === 0 ? 'type="date"' : ''}></label>`).join('');
+  document.querySelectorAll('#info input').forEach(inp => inp.oninput = () => { chk.info[inp.dataset.k] = inp.value; save(); });
+
+  document.getElementById('checkBody').innerHTML = cfg.items.map((it, i) => {
+    const r = chk.res[it.id] || '';
+    const pills = ['good','mid','bad','na'].map(v =>
+      `<button class="pill ${r === v ? 'on' : ''}" data-id="${it.id}" data-v="${v}">${esc(cfg.labels[v])}</button>`).join('');
+    return `<tr data-row="${it.id}">
+      <td class="n">${i + 1}</td>
+      <td><div class="cat">${esc(it.cat)} · ${esc(it.name)}</div><div class="how">${esc(it.how)}</div>${it.ko ? '<span class="ko">Loại trừ nếu Lỗi nặng</span>' : ''}</td>
+      <td><div class="pills">${pills}</div></td>
+      <td class="n" data-pt></td>
+      <td class="n">${it.w}%</td>
+      <td class="n" data-wp></td>
+      <td><textarea data-note="${it.id}" rows="2" placeholder="Mô tả lỗi...">${esc(chk.notes[it.id])}</textarea></td>
+    </tr>`;
+  }).join('');
+
+  document.querySelectorAll('.pill').forEach(p => p.onclick = () => {
+    const id = p.dataset.id;
+    chk.res[id] = chk.res[id] === p.dataset.v ? '' : p.dataset.v;
+    save(); renderCheck();
+  });
+  document.querySelectorAll('[data-note]').forEach(t => t.oninput = () => { chk.notes[t.dataset.note] = t.value; save(); });
+  calc();
+}
+
+function calc(){
+  let wSum = 0, wpSum = 0, done = 0, ko = 0;
+  cfg.items.forEach(it => {
+    const r = chk.res[it.id], row = document.querySelector(`tr[data-row="${it.id}"]`);
+    const pt = (r && r !== 'na') ? Number(cfg.scores[r]) : null;
+    if (r) done++;
+    if (pt !== null){ wSum += Number(it.w); wpSum += pt * Number(it.w); }
+    const isKo = it.ko && r === 'bad';
+    if (isKo) ko++;
+    if (row){
+      row.querySelector('[data-pt]').textContent = pt === null ? (r === 'na' ? '–' : '') : pt;
+      row.querySelector('[data-wp]').textContent = pt === null ? '' : (pt * it.w / 10).toFixed(1);
+      row.classList.toggle('excluded', isKo);
+      row.classList.toggle('na', r === 'na');
+    }
+  });
+  const total = cfg.items.length;
+  const score = wSum > 0 ? Math.round(wpSum / wSum * 10 * 10) / 10 : null;
+  document.getElementById('sScore').textContent = score === null ? '–' : score;
+  document.getElementById('sDone').textContent = `${done}/${total}`;
+  document.getElementById('sKo').textContent = ko;
+
+  const box = document.getElementById('vBox'), v = document.getElementById('sVerdict');
+  let text, cls;
+  if (ko > 0){ text = 'KHÔNG NHẬN · có lỗi loại trừ'; cls = 'no'; }
+  else if (done < total){ text = `Còn ${total - done} mục chưa chấm`; cls = 'wait'; }
+  else if (score === null){ text = 'Không có mục nào để tính điểm'; cls = 'wait'; }
+  else {
+    const g = [...cfg.grades].sort((a, b) => b.min - a.min).find(g => score >= g.min);
+    text = g ? g.name : 'KHÔNG NHẬN · điểm thấp'; cls = g ? 'ok' : 'no';
+  }
+  v.textContent = text; box.className = `card stat verdict ${cls}`;
+}
+
+function newCheck(){
+  askConfirm('Xóa kết quả đang chấm để kiểm tra cây vợt mới?', () => {
+    chk = {info:{}, res:{}, notes:{}}; save(); renderCheck(); toast('Đã tạo phiếu mới');
+  });
+}
+
+/* ---------- Chỉnh tiêu chí ---------- */
+function renderSetup(){
+  document.getElementById('setupBody').innerHTML = cfg.items.map((it, i) => `<tr>
+    <td class="n">${i + 1}</td>
+    <td><input data-i="${i}" data-f="cat" value="${esc(it.cat)}"></td>
+    <td><textarea data-i="${i}" data-f="name" rows="2">${esc(it.name)}</textarea></td>
+    <td><textarea data-i="${i}" data-f="how" rows="3">${esc(it.how)}</textarea></td>
+    <td class="n w"><input type="number" min="0" step="1" data-i="${i}" data-f="w" value="${it.w}"></td>
+    <td class="n"><input type="checkbox" data-i="${i}" data-f="ko" ${it.ko ? 'checked' : ''} style="width:18px;height:18px"></td>
+    <td class="n" style="white-space:nowrap">
+      <button class="ghost" onclick="moveItem(${i},-1)" title="Lên">↑</button>
+      <button class="ghost" onclick="moveItem(${i},1)" title="Xuống">↓</button>
+      <button class="ghost" onclick="delItem(${i})" title="Xóa">✕</button>
+    </td></tr>`).join('');
+  document.querySelectorAll('#setupBody [data-f]').forEach(el => {
+    el.oninput = el.onchange = () => {
+      const it = cfg.items[el.dataset.i], f = el.dataset.f;
+      it[f] = f === 'ko' ? el.checked : f === 'w' ? Number(el.value || 0) : el.value;
+      save(); wSum();
+    };
+  });
+  wSum();
+
+  document.getElementById('scoreCfg').innerHTML = ['good','mid','bad'].map(k =>
+    `<div class="row"><input data-lbl="${k}" value="${esc(cfg.labels[k])}" style="flex:1;width:auto;text-align:left"><input type="number" data-sc="${k}" value="${cfg.scores[k]}"><small>điểm</small></div>`).join('') +
+    `<div class="row"><input data-lbl="na" value="${esc(cfg.labels.na)}" style="flex:1;width:auto;text-align:left"><span style="flex:0 0 auto;color:var(--muted)">bỏ qua</span></div>`;
+  document.querySelectorAll('[data-sc]').forEach(el => el.oninput = () => { cfg.scores[el.dataset.sc] = Number(el.value || 0); save(); });
+  document.querySelectorAll('[data-lbl]').forEach(el => el.oninput = () => { cfg.labels[el.dataset.lbl] = el.value; save(); });
+
+  document.getElementById('gradeCfg').innerHTML = cfg.grades.map((g, i) =>
+    `<div class="row"><input data-gn="${i}" value="${esc(g.name)}" style="flex:1;width:auto;text-align:left"><small>từ</small><input type="number" data-gm="${i}" value="${g.min}"><button class="ghost" onclick="delGrade(${i})">✕</button></div>`).join('') +
+    `<button onclick="addGrade()" style="margin-top:4px">+ Thêm mốc</button>`;
+  document.querySelectorAll('[data-gn]').forEach(el => el.oninput = () => { cfg.grades[el.dataset.gn].name = el.value; save(); });
+  document.querySelectorAll('[data-gm]').forEach(el => el.oninput = () => { cfg.grades[el.dataset.gm].min = Number(el.value || 0); save(); });
+
+  const fc = document.getElementById('fieldsCfg');
+  fc.value = cfg.fields.join(', ');
+  fc.oninput = () => { cfg.fields = fc.value.split(',').map(s => s.trim()).filter(Boolean); save(); };
+}
+function wSum(){
+  const s = cfg.items.reduce((a, it) => a + Number(it.w || 0), 0);
+  const el = document.getElementById('wSum');
+  el.textContent = s + '%'; el.className = s === 100 ? 'sum-ok' : 'sum-bad';
+  el.title = s === 100 ? '' : 'Không bắt buộc bằng 100%, điểm vẫn được quy đổi về thang 100';
+}
+function addItem(){ const it = {cat:'Hạng mục mới', name:'Tiêu chí mới', how:'', w:5, ko:false}; ensureId(it); cfg.items.push(it); save(); renderSetup(); }
+function delItem(i){ askConfirm(`Xóa tiêu chí "${cfg.items[i].name}"?`, () => { cfg.items.splice(i, 1); save(); renderSetup(); }); }
+function moveItem(i, d){ const j = i + d; if (j < 0 || j >= cfg.items.length) return; [cfg.items[i], cfg.items[j]] = [cfg.items[j], cfg.items[i]]; save(); renderSetup(); }
+function addGrade(){ cfg.grades.push({name:'Loại mới', min:0}); save(); renderSetup(); }
+function delGrade(i){ cfg.grades.splice(i, 1); save(); renderSetup(); }
+function resetConfig(){
+  askConfirm('Khôi phục tiêu chí, trọng số và mốc xếp loại về mặc định?', () => {
+    cfg = clone(DEFAULT); cfg.items.forEach(ensureId); save(); renderSetup(); toast('Đã khôi phục mặc định');
+  });
+}
+
+/* ---------- Hộp thoại trong trang (thay cho confirm, vì trình duyệt có thể chặn) ---------- */
+function askConfirm(msg, onYes){
+  const m = document.getElementById('modal');
+  document.getElementById('mTitle').textContent = 'Xác nhận';
+  document.getElementById('mMsg').textContent = msg;
+  document.getElementById('mCode').style.display = 'none';
+  document.getElementById('mActions').innerHTML = '<button id="mNo">Hủy</button><button class="primary" id="mYes">Đồng ý</button>';
+  document.getElementById('mNo').onclick = closeModal;
+  document.getElementById('mYes').onclick = () => { closeModal(); onYes(); };
+  m.classList.add('show');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+
+/* ---------- Tải file HTML có sẵn cấu hình ---------- */
+function buildHtml(){
+  const doc = document.documentElement.cloneNode(true);
+  const out = clone(cfg); out.items.forEach(it => delete it.id);
+  doc.querySelector('#defaultConfig').textContent = '\n' + JSON.stringify(out, null, 2) + '\n';
+  ['info','checkBody','setupBody','scoreCfg','gradeCfg','mActions'].forEach(id => { const el = doc.querySelector('#' + id); if (el) el.innerHTML = ''; });
+  doc.querySelector('#mCode').value = ''; doc.querySelector('#mCode').textContent = '';
+  doc.querySelector('#modal').className = 'modal';
+  doc.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('on', i === 0));
+  doc.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('on', i === 0));
+  doc.querySelector('#toast').className = 'toast';
+  // Bỏ các phần do trình xem tự chèn thêm, chỉ giữ nội dung của checklist
+  doc.querySelectorAll('body > *').forEach(el => { if (!el.matches('.wrap, #toast, #modal, script#defaultConfig, script#app')) el.remove(); });
+  doc.querySelectorAll('head > script, head > link').forEach(el => el.remove());
+  return '<!DOCTYPE html>\n' + doc.outerHTML;
+}
+function downloadHtml(){
+  const html = buildHtml();
+  try {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html], {type:'text/html'}));
+    a.download = 'checklist_kiem_tra_vot.html';
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch(e) {}
+  // Luôn hiện cách lưu thủ công, vì trình xem có thể chặn tải file
+  const m = document.getElementById('modal'), code = document.getElementById('mCode');
+  document.getElementById('mTitle').textContent = 'Lưu file HTML';
+  document.getElementById('mMsg').innerHTML = 'Nếu file không tự tải về: bấm <b>Sao chép mã</b>, mở TextEdit hoặc Notepad, dán vào và lưu với tên <b>checklist_kiem_tra_vot.html</b>. Mở file đó bằng trình duyệt là dùng được.';
+  code.style.display = 'block'; code.value = html;
+  document.getElementById('mActions').innerHTML = '<button id="mClose">Đóng</button><button class="primary" id="mCopy">Sao chép mã</button>';
+  document.getElementById('mClose').onclick = closeModal;
+  document.getElementById('mCopy').onclick = () => {
+    code.focus(); code.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch(e) {}
+    if (!ok && navigator.clipboard) navigator.clipboard.writeText(html).then(() => toast('Đã sao chép'), () => toast('Hãy nhấn Cmd+C / Ctrl+C để sao chép'));
+    else toast(ok ? 'Đã sao chép' : 'Hãy nhấn Cmd+C / Ctrl+C để sao chép');
+  };
+  m.classList.add('show');
+}
+function printSheet(){
+  try { window.print(); } catch(e) {}
+  toast('Nếu hộp thoại in không hiện, nhấn Cmd+P / Ctrl+P');
+}
+
+renderCheck(); renderSetup();
+</script>
+
+
+</body></html>
