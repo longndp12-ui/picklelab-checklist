@@ -85,6 +85,15 @@
     .pill{display:none}.pill.on{display:inline-block}
     .card{break-inside:avoid}
   }
+/* PRICE START */
+  .lookup{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+  .lookup label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .lookup input{flex:1 1 200px;width:auto;text-transform:uppercase}
+  .lookup .res{flex:1 1 100%;font-size:14px;line-height:1.4}
+  .lookup .res b{font-family:"Iowan Old Style",Georgia,serif;font-size:24px;font-variant-numeric:tabular-nums}
+  .lookup .res.err{color:var(--bad)}
+  @media screen and (max-width:700px){.lookup button{flex:1 1 100%;min-height:46px}}
+/* PRICE END */
 /* MOBILE START */
   @media screen and (max-width:700px){
     body{padding:16px 12px 150px;font-size:15px}
@@ -166,6 +175,14 @@
 
   <!-- ===== CHẤM VỢT ===== -->
   <section class="panel on" id="p-check">
+<!-- PRICE START -->
+    <form class="card lookup no-print" id="lookup" onsubmit="lookupPrice(event)">
+      <label for="lkSku">Tra giá theo mã vợt</label>
+      <input id="lkSku" placeholder="VD: VL-DL-014" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <button class="primary" type="submit">Tra giá</button>
+      <div class="res" id="lkRes" aria-live="polite"></div>
+    </form>
+    <!-- PRICE END -->
     <table class="tbl">
       <thead><tr>
         <th style="width:36px">#</th><th style="width:30%">Tiêu chí &amp; cách kiểm tra</th><th>Kết quả</th>
@@ -560,6 +577,31 @@ function printSheet(){
   toast('Nếu hộp thoại in không hiện, nhấn Cmd+P / Ctrl+P');
 }
 
+/* PRICE START */
+const PRICE_API_URL = '';
+const vnd = n => Number(n).toLocaleString('vi-VN') + ' đ';
+async function lookupPrice(ev){
+  ev.preventDefault();
+  const out = document.getElementById('lkRes');
+  const sku = document.getElementById('lkSku').value.trim().toUpperCase();
+  out.className = 'res';
+  if (!sku){ out.textContent = 'Nhập mã vợt để tra giá.'; return; }
+  if (!PRICE_API_URL){ out.className = 'res err'; out.textContent = 'Chưa cấu hình địa chỉ tra giá.'; return; }
+  out.textContent = 'Đang tra...';
+  try {
+    const r = await fetch(PRICE_API_URL + '?sku=' + encodeURIComponent(sku));
+    const d = await r.json();
+    if (!d.ok){ out.className = 'res err'; out.textContent = d.error || 'Không tìm thấy mã.'; return; }
+    out.innerHTML = '';
+    const t = document.createElement('div'); t.textContent = d.sku + ' · ' + d.title;
+    const p = document.createElement('b'); p.textContent = vnd(d.price);
+    out.append(t, p);
+    if (d.compareAtPrice > d.price){ const c = document.createElement('div'); c.className = 'how'; c.textContent = 'Giá so sánh: ' + vnd(d.compareAtPrice); out.append(c); }
+  } catch(e) {
+    out.className = 'res err'; out.textContent = 'Không kết nối được, thử lại sau.';
+  }
+}
+/* PRICE END */
 renderCheck(); renderSetup();
 </script>
 
