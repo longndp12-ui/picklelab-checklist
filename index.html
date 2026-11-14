@@ -166,7 +166,6 @@
 
   <!-- ===== CHẤM VỢT ===== -->
   <section class="panel on" id="p-check">
-    <div class="card info" id="info"></div>
     <table class="tbl">
       <thead><tr>
         <th style="width:36px">#</th><th style="width:30%">Tiêu chí &amp; cách kiểm tra</th><th>Kết quả</th>
@@ -213,12 +212,6 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top:16px">
-      <h2>Thông tin đầu phiếu</h2>
-      <textarea id="fieldsCfg" rows="3"></textarea>
-      <p class="hint">Mỗi ô cách nhau bằng dấu phẩy. Thông tin này hiện ở đầu tab "Chấm vợt".</p>
-    </div>
-
     <div class="card no-print" style="margin-top:16px">
       <h2>Lưu và chia sẻ</h2>
       <p class="hint" style="margin-top:0">Mọi thay đổi được lưu tự động trên trình duyệt này. Bấm <b>Tải file HTML</b> để có một file mới chứa sẵn tiêu chí đã chỉnh, gửi cho chi nhánh khác mở bằng trình duyệt là dùng được ngay.</p>
@@ -242,17 +235,8 @@
 <!-- Cấu hình mặc định. Có thể sửa trực tiếp ở đây bằng trình soạn thảo văn bản. -->
 <script id="defaultConfig" type="application/json">
 {
-  "version": 3,
-  "fields": [
-    "Ngày kiểm tra",
-    "Chi nhánh",
-    "Người kiểm tra",
-    "Người bán / ký gửi",
-    "Mã sản phẩm (Haravan)",
-    "Hãng",
-    "Mẫu vợt",
-    "Loại mặt vợt"
-  ],
+  "version": 4,
+  "fields": [],
   "scores": {
     "good": 10,
     "mid": 5,
@@ -391,7 +375,8 @@ document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
 
 /* ---------- Chấm vợt ---------- */
 function renderCheck(){
-  document.getElementById('info').innerHTML = cfg.fields.map((f, i) =>
+  const infoEl = document.getElementById('info');
+  if (infoEl) infoEl.innerHTML = cfg.fields.map((f, i) =>
     `<label class="f">${esc(f)}<input data-k="${esc(f)}" value="${esc(chk.info[f])}" ${i === 0 ? 'type="date"' : ''}></label>`).join('');
   document.querySelectorAll('#info input').forEach(inp => inp.oninput = () => { chk.info[inp.dataset.k] = inp.value; save(); });
 
@@ -495,8 +480,10 @@ function renderSetup(){
   document.querySelectorAll('[data-gm]').forEach(el => el.oninput = () => { cfg.grades[el.dataset.gm].min = Number(el.value || 0); save(); });
 
   const fc = document.getElementById('fieldsCfg');
-  fc.value = cfg.fields.join(', ');
-  fc.oninput = () => { cfg.fields = fc.value.split(',').map(s => s.trim()).filter(Boolean); save(); };
+  if (fc) {
+    fc.value = cfg.fields.join(', ');
+    fc.oninput = () => { cfg.fields = fc.value.split(',').map(s => s.trim()).filter(Boolean); save(); };
+  }
 }
 function wSum(){
   const s = cfg.items.reduce((a, it) => a + Number(it.w || 0), 0);
