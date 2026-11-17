@@ -152,6 +152,8 @@
     .modal-box{padding:16px}
   }
 /* MOBILE END */
+  .flowlink{display:inline-block;margin-top:6px;font-size:13px;color:var(--muted)}
+  @media print{.flowlink{display:none}}
 </style>
 </head>
 <body>
@@ -160,6 +162,7 @@
     <div>
       <span class="tag">Kiểm tra vợt lướt</span>
       <h1>Checklist <em>kiểm tra vợt</em></h1>
+      <a class="flowlink" href="flows/">Xem các flow vận hành →</a>
     </div>
     <div class="toolbar">
       <button onclick="newCheck()">Vợt mới</button>
